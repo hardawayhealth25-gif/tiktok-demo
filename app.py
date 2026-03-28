@@ -115,7 +115,7 @@ def tiktok_callback():
             'code_verifier': code_verifier,
         }
 
-        token_response = requests.post(TIKTOK_TOKEN_URL, json=token_data, timeout=10)
+        token_response = requests.post(TIKTOK_TOKEN_URL, data=token_data, timeout=10)
         token_response.raise_for_status()
 
         token_result = token_response.json()
