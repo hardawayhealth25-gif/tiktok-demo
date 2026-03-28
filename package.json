@@ -1,0 +1,20 @@
+{
+  "name": "tiktok-api-demo",
+  "version": "1.0.0",
+  "description": "TikTok Login Kit + Content Posting API integration demo for Hardaway Labs",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.2",
+    "multer": "^1.4.5-lts.1",
+    "dotenv": "^16.3.1",
+    "express-session": "^1.17.3"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
