@@ -277,18 +277,26 @@ def init_video_upload(access_token, user_id, post_type='draft', video_size=0):
         # Use different endpoint for draft vs direct post
         url = TIKTOK_DRAFT_INIT_URL if post_type == 'draft' else TIKTOK_VIDEO_INIT_URL
 
-        payload = {
-            'post_info': {
-                'title': 'Video Upload',
-                'privacy_level': 'SELF_ONLY',
-            },
-            'source_info': {
-                'source': 'FILE_UPLOAD',
-                'video_size': video_size,
-                'chunk_size': min(video_size, 5242880),
-                'total_chunk_count': max(1, (video_size + 5242879) // 5242880),
-            }
+        source_info = {
+            'source': 'FILE_UPLOAD',
+            'video_size': video_size,
+            'chunk_size': min(video_size, 5242880),
+            'total_chunk_count': max(1, (video_size + 5242879) // 5242880),
         }
+
+        if post_type == 'draft':
+            payload = {'source_info': source_info}
+        else:
+            payload = {
+                'post_info': {
+                    'title': 'Video Upload',
+                    'privacy_level': 'SELF_ONLY',
+                },
+                'source_info': source_info,
+            }
+
+        app.logger.info(f"Upload init URL: {url}")
+        app.logger.info(f"Upload init payload: {payload}")
 
         response = requests.post(
             url,
@@ -296,9 +304,15 @@ def init_video_upload(access_token, user_id, post_type='draft', video_size=0):
             json=payload,
             timeout=10
         )
-        response.raise_for_status()
 
-        return response.json()
+        result = response.json()
+        app.logger.info(f"Upload init response ({response.status_code}): {result}")
+
+        if response.status_code != 200:
+            error_msg = result.get('error', {}).get('message', '') or result.get('error_description', '') or str(result)
+            return {'error': 'init_failed', 'error_description': f"TikTok API ({response.status_code}): {error_msg}"}
+
+        return result
 
     except Exception as e:
         app.logger.error(f"Error initializing upload: {str(e)}")
