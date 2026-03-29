@@ -186,7 +186,7 @@ def upload_video():
         user_id = session.get('tiktok_user_id')
 
         # Step 1: Initialize video upload
-        init_response = init_video_upload(access_token, user_id, post_type)
+        init_response = init_video_upload(access_token, user_id, post_type, video_size=len(video_data))
 
         if not init_response or 'error' in init_response:
             error_msg = init_response.get('error_description', 'Failed to initialize upload') if init_response else 'Upload initialization failed'
@@ -266,7 +266,7 @@ def get_user_info(access_token, user_id):
         return None
 
 
-def init_video_upload(access_token, user_id, post_type='draft'):
+def init_video_upload(access_token, user_id, post_type='draft', video_size=0):
     """Initialize video upload with TikTok API."""
     try:
         headers = {
@@ -278,9 +278,15 @@ def init_video_upload(access_token, user_id, post_type='draft'):
         url = TIKTOK_DRAFT_INIT_URL if post_type == 'draft' else TIKTOK_VIDEO_INIT_URL
 
         payload = {
+            'post_info': {
+                'title': 'Video Upload',
+                'privacy_level': 'SELF_ONLY',
+            },
             'source_info': {
                 'source': 'FILE_UPLOAD',
-                'platform': 'OTHER_PLATFORMS'
+                'video_size': video_size,
+                'chunk_size': min(video_size, 5242880),
+                'total_chunk_count': max(1, (video_size + 5242879) // 5242880),
             }
         }
 
